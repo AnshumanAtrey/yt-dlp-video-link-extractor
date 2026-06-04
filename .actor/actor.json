@@ -1,7 +1,7 @@
 {
   "actorSpecification": 1,
   "name": "yt-dlp-video-link-extractor",
-  "title": "yt-dlp Link Extractor - Any Video URL to Download Links | 1000+ Sites",
+  "title": "yt-dlp Video Link Extractor - Any URL to Links, 1000+ Sites",
   "description": "Paste any video URL and get back direct stream/download links plus full metadata. Powered by yt-dlp across 1000+ sites. No files stored, no RAM burned.",
   "version": "0.1",
   "buildTag": "latest",
@@ -11,7 +11,7 @@
   "readme": "../README.md",
   "minMemoryMbytes": 256,
   "maxMemoryMbytes": 1024,
-  "categories": ["VIDEOS_IMAGES", "DEVELOPER_TOOLS", "OTHER"],
+  "categories": ["VIDEOS", "DEVELOPER_TOOLS", "OTHER"],
   "seoTitle": "yt-dlp Link Extractor - Any Video URL to Direct Links",
   "seoDescription": "Paste any video URL, get direct stream + download links plus metadata. yt-dlp across 1000+ sites: YouTube, TikTok, Vimeo, Twitch, SoundCloud. Just the links. Bulk.",
   "storages": {

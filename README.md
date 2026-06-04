@@ -1,4 +1,4 @@
-# yt-dlp Link Extractor - Any Video URL to Download Links | 1000+ Sites
+# yt-dlp Video Link Extractor - Any URL to Links, 1000+ Sites
 
 Paste any video URL and get back the direct stream and download links plus full metadata. No files are stored, no RAM is burned - it resolves the links, it does not host the bytes.
 
