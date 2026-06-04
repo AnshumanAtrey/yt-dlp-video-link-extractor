@@ -1,0 +1,17 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+storage/
+apify_storage/
+.apify/
+.git/
+.gitignore
+_localtest.py
+_inspect.py
+.DS_Store
+*.log
+cookies.txt
+README.md
+llms.txt

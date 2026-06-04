@@ -1,0 +1,53 @@
+{
+  "title": "yt-dlp Video Link Extractor",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "urls": {
+      "title": "Video URLs",
+      "type": "array",
+      "description": "Paste one or more video URLs. Any site yt-dlp supports works - YouTube, TikTok, Vimeo, Twitch, SoundCloud, Reddit, Dailymotion and 1000+ more. A playlist or channel URL expands into its videos (capped by Playlist limit).",
+      "editor": "stringList",
+      "prefill": ["https://www.youtube.com/watch?v=dQw4w9WgXcQ"],
+      "example": ["https://www.youtube.com/watch?v=dQw4w9WgXcQ"]
+    },
+    "includeFormats": {
+      "title": "Include all formats",
+      "type": "boolean",
+      "description": "Return the full list of available formats (every resolution and codec with its direct URL), plus all thumbnail URLs. Turn off for a leaner result with only the best links.",
+      "default": true
+    },
+    "includeSubtitles": {
+      "title": "Include subtitles",
+      "type": "boolean",
+      "description": "Include subtitle and auto-caption track URLs grouped by language.",
+      "default": false
+    },
+    "playlistLimit": {
+      "title": "Playlist limit",
+      "type": "integer",
+      "description": "When a URL is a playlist or channel, resolve at most this many videos from it. Keeps big channels from running long.",
+      "default": 50,
+      "minimum": 1,
+      "maximum": 1000,
+      "unit": "videos",
+      "sectionCaption": "Advanced",
+      "sectionDescription": "Optional settings for proxies, auth cookies, and large collections."
+    },
+    "proxyConfiguration": {
+      "title": "Proxy",
+      "type": "object",
+      "description": "Optional. Route requests through a proxy. Useful for sites that block datacenter IPs (TikTok, Instagram, X) - use a residential group there.",
+      "editor": "proxy",
+      "default": { "useApifyProxy": false }
+    },
+    "cookies": {
+      "title": "Cookies (optional)",
+      "type": "string",
+      "description": "Optional Netscape-format cookie file contents, for age-restricted or login-gated videos. Leave blank for public videos.",
+      "editor": "textarea",
+      "isSecret": true
+    }
+  },
+  "required": ["urls"]
+}

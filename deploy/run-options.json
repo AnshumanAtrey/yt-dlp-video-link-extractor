@@ -1,0 +1,7 @@
+{
+  "defaultRunOptions": {
+    "build": "latest",
+    "memoryMbytes": 512,
+    "timeoutSecs": 1200
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "pricingInfos": [
+    {
+      "pricingModel": "PAY_PER_EVENT",
+      "apifyMarginPercentage": 0.2,
+      "pricingPerEvent": {
+        "actorChargeEvents": {
+          "apify-actor-start": {
+            "eventTitle": "Run start",
+            "eventDescription": "Charged once when a run starts (per GB of run memory). Covers run setup.",
+            "eventPriceUsd": 0.002,
+            "isOneTimeEvent": true
+          },
+          "url-processed": {
+            "eventTitle": "URL processed",
+            "eventDescription": "Charged once per input URL the actor attempts to resolve, whether or not a video is found. Covers the resolve attempt.",
+            "eventPriceUsd": 0.003
+          },
+          "video-resolved": {
+            "eventTitle": "Video resolved",
+            "eventDescription": "Charged per video successfully resolved to its direct links and metadata.",
+            "eventPriceUsd": 0.04,
+            "isPrimaryEvent": true
+          }
+        }
+      }
+    }
+  ]
+}

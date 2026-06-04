@@ -1,0 +1,14 @@
+# Apify Python SDK (pin below the next major to avoid surprise breaks).
+apify < 3.0
+
+# Transitive pins that MUST stay until the apify SDK upper-bounds them itself.
+# crawlee 0.6.x (pulled by apify 2.7.x) breaks at import with:
+#   - pydantic >= 2.11  -> "cannot specify both default and default_factory"
+#   - browserforge >= 1.2.4 -> crawlee calls download.DATA_FILES, renamed to DATA_DIRS
+# Without these, the image BUILDS fine but the actor CRASHES on first run.
+pydantic < 2.11
+browserforge < 1.2.4
+
+# yt-dlp intentionally left unpinned: each rebuild pulls the latest release,
+# which is how extractor fixes for sites that change their pages land for free.
+yt-dlp

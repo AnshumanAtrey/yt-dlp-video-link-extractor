@@ -1,0 +1,54 @@
+{
+  "actorSpecification": 1,
+  "name": "yt-dlp-video-link-extractor",
+  "title": "yt-dlp Link Extractor - Any Video URL to Download Links | 1000+ Sites",
+  "description": "Paste any video URL and get back direct stream/download links plus full metadata. Powered by yt-dlp across 1000+ sites. No files stored, no RAM burned.",
+  "version": "0.1",
+  "buildTag": "latest",
+  "input": "./INPUT_SCHEMA.json",
+  "output": "./output_schema.json",
+  "dockerfile": "../Dockerfile",
+  "readme": "../README.md",
+  "minMemoryMbytes": 256,
+  "maxMemoryMbytes": 1024,
+  "categories": ["VIDEOS_IMAGES", "DEVELOPER_TOOLS", "OTHER"],
+  "seoTitle": "yt-dlp Link Extractor - Any Video URL to Direct Links",
+  "seoDescription": "Paste any video URL, get direct stream + download links plus metadata. yt-dlp across 1000+ sites: YouTube, TikTok, Vimeo, Twitch, SoundCloud. Just the links. Bulk.",
+  "storages": {
+    "dataset": {
+      "actorSpecification": 1,
+      "title": "Resolved video links",
+      "views": {
+        "overview": {
+          "title": "Links",
+          "description": "Direct link plus key metadata for each resolved video.",
+          "transformation": {
+            "fields": [
+              "title",
+              "extractor",
+              "duration",
+              "view_count",
+              "best_resolution",
+              "best_url_kind",
+              "best_url",
+              "webpage_url"
+            ]
+          },
+          "display": {
+            "component": "table",
+            "properties": {
+              "title": { "label": "Title" },
+              "extractor": { "label": "Site" },
+              "duration": { "label": "Length" },
+              "view_count": { "label": "Views" },
+              "best_resolution": { "label": "Quality" },
+              "best_url_kind": { "label": "Type" },
+              "best_url": { "label": "Direct link" },
+              "webpage_url": { "label": "Source" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
