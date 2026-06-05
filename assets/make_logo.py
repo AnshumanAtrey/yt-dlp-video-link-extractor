@@ -42,10 +42,8 @@ def font(size):
 
 
 def build(tile_rgb, name):
-    img = Image.new("RGBA", (SS, SS), (0, 0, 0, 0))
-    mask = Image.new("L", (SS, SS), 0)
-    ImageDraw.Draw(mask).rounded_rectangle([0, 0, SS - 1, SS - 1], radius=int(SS * 0.205), fill=255)
-    img.paste(Image.new("RGBA", (SS, SS), tile_rgb + (255,)), (0, 0), mask)
+    # solid full square, SHARP corners (no rounding)
+    img = Image.new("RGBA", (SS, SS), tile_rgb + (255,))
     # big mark, centered both axes
     scale = min(SS * 0.86 / mw, SS * 0.66 / mh)
     nm = mark.resize((int(mw * scale), int(mh * scale)), Image.LANCZOS)
@@ -55,6 +53,6 @@ def build(tile_rgb, name):
     return name
 
 
-build((255, 255, 255), "logo_white.png")   # faithful, matches original bg
-build((13, 17, 23), "logo_dark.png")        # dark app-icon, mark pops
+build((13, 17, 23), "logo_dark.png")        # dark-blue square (same bg color), sharp corners
+build((255, 255, 255), "logo_white.png")    # faithful white variant, sharp corners
 print("wrote logo_white.png + logo_dark.png (512x512) from official yt-dlp mark")
