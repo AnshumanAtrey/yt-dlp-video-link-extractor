@@ -1,59 +1,39 @@
-"""Generate the actor logo: a play button (video) + a chain link (the extracted
-link) on a dark rounded tile. 512x512 PNG, Apify store spec."""
+"""Actor logo from the OFFICIAL yt-dlp >_dlp mark (yt-dlp/.github/banner.svg).
+Produces a faithful white-tile version and a dark-tile app-icon version."""
 
 from PIL import Image, ImageDraw, ImageFont
 
+SRC = "/tmp/ytdlp-trans.png"  # transparent high-res render of banner.svg
 S = 512
-SS = S * 4  # supersample, downscale at the end for crisp edges
+SS = S * 4
+OUT = "/Users/atrey/Desktop/code/yt-dlp-video-link-extractor/assets"
+RED = (237, 28, 36)
+
+# --- isolate the top >_dlp mark cluster (banner also has a tagline row) ---
+src = Image.open(SRC).convert("RGBA")
+W, H = src.size
+alpha = src.split()[3].load()
+rows = [any(alpha[x, y] > 25 for x in range(0, W, 4)) for y in range(H)]
+clusters, start, gap = [], None, 0
+for y in range(H + 1):
+    on = y < H and rows[y]
+    if on:
+        start = y if start is None else start
+        gap = 0
+    elif start is not None:
+        gap += 1
+        if gap > int(H * 0.05):
+            clusters.append((start, y - gap))
+            start = None
+my0, my1 = clusters[0]                       # top cluster = the >_dlp glyph
+mark = src.crop((0, my0, W, my1 + 1))
+mark = mark.crop(mark.split()[3].getbbox())  # tight to the glyph
+mw, mh = mark.size
 
 
-def lerp(a, b, t):
-    return tuple(int(a[i] * (1 - t) + b[i] * t) for i in range(3))
-
-
-img = Image.new("RGBA", (SS, SS), (0, 0, 0, 0))
-
-# --- dark gradient rounded-square tile ---
-top, bot = (30, 41, 61), (12, 16, 22)  # #1e293d -> #0c1016
-grad = Image.new("RGB", (1, SS))
-for y in range(SS):
-    grad.putpixel((0, y), lerp(top, bot, y / SS))
-grad = grad.resize((SS, SS))
-mask = Image.new("L", (SS, SS), 0)
-ImageDraw.Draw(mask).rounded_rectangle([0, 0, SS - 1, SS - 1], radius=int(SS * 0.205), fill=255)
-img.paste(grad, (0, 0), mask)
-d = ImageDraw.Draw(img)
-d.rounded_rectangle([SS * 0.028, SS * 0.028, SS * 0.972, SS * 0.972],
-                    radius=int(SS * 0.17), outline=(255, 255, 255, 30), width=int(SS * 0.005))
-
-# --- play triangle (yt-dlp red), cleanly rounded corners via curve-joined stroke ---
-red = (255, 78, 78)
-cx, cy = SS * 0.40, SS * 0.435
-w, h = SS * 0.155, SS * 0.19
-pts = [(cx - w, cy - h), (cx + w * 1.35, cy), (cx - w, cy + h)]
-d.polygon(pts, fill=red)
-d.line(pts + [pts[0]], fill=red, width=int(SS * 0.045), joint="curve")  # rounds the corners
-
-# --- chain link (cyan): two overlapping capsules in a centered canvas, then 45 deg ---
-cyan = (45, 222, 196)
-LK = int(SS * 0.42)
-lc = Image.new("RGBA", (LK, LK), (0, 0, 0, 0))
-lcd = ImageDraw.Draw(lc)
-lw = int(LK * 0.12)
-cw, ch = LK * 0.46, LK * 0.27
-cyc = LK * 0.5
-for ax in (LK * 0.31, LK * 0.59):  # two capsules overlapping in the middle = a link
-    lcd.rounded_rectangle([ax - cw / 2, cyc - ch / 2, ax + cw / 2, cyc + ch / 2],
-                          radius=ch / 2, outline=cyan, width=lw)
-lc = lc.rotate(45, resample=Image.BICUBIC, expand=False)
-img.alpha_composite(lc, (int(SS * 0.49), int(SS * 0.255)))
-
-# --- wordmark ---
-def load_font(size):
-    for p in [
-        "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
-        "/System/Library/Fonts/Helvetica.ttc",
-    ]:
+def font(size):
+    for p in ["/System/Library/Fonts/Supplemental/Arial Bold.ttf",
+              "/System/Library/Fonts/Helvetica.ttc"]:
         try:
             return ImageFont.truetype(p, size)
         except Exception:
@@ -61,15 +41,25 @@ def load_font(size):
     return ImageFont.load_default()
 
 
-d = ImageDraw.Draw(img)
-font = load_font(int(SS * 0.082))
-text = "yt-dlp"
-tb = d.textbbox((0, 0), text, font=font)
-d.text(((SS - (tb[2] - tb[0])) / 2 - tb[0], SS * 0.775 - tb[1]), text, font=font, fill=(226, 232, 240))
+def build(tile_rgb, word_rgb, name):
+    img = Image.new("RGBA", (SS, SS), (0, 0, 0, 0))
+    mask = Image.new("L", (SS, SS), 0)
+    ImageDraw.Draw(mask).rounded_rectangle([0, 0, SS - 1, SS - 1], radius=int(SS * 0.205), fill=255)
+    img.paste(Image.new("RGBA", (SS, SS), tile_rgb + (255,)), (0, 0), mask)
+    # place mark upper-center
+    scale = min(SS * 0.74 / mw, SS * 0.42 / mh)
+    nm = mark.resize((int(mw * scale), int(mh * scale)), Image.LANCZOS)
+    img.alpha_composite(nm, ((SS - nm.width) // 2, int(SS * 0.235)))
+    # wordmark
+    d = ImageDraw.Draw(img)
+    f = font(int(SS * 0.10))
+    tb = d.textbbox((0, 0), "yt-dlp", font=f)
+    d.text(((SS - (tb[2] - tb[0])) / 2 - tb[0], SS * 0.70 - tb[1]), "yt-dlp", font=f, fill=word_rgb)
+    out = img.resize((S, S), Image.LANCZOS)
+    out.save(f"{OUT}/{name}")
+    return name
 
-out = img.resize((S, S), Image.LANCZOS)
-out.save("/Users/atrey/Desktop/code/yt-dlp-video-link-extractor/assets/logo.png")
-flat = Image.new("RGB", (S, S), (12, 16, 22))
-flat.paste(out, (0, 0), out)
-flat.save("/Users/atrey/Desktop/code/yt-dlp-video-link-extractor/assets/logo_flat.png")
-print("wrote assets/logo.png + logo_flat.png (512x512)")
+
+build((255, 255, 255), RED, "logo_white.png")          # faithful, matches original bg
+build((13, 17, 23), (236, 240, 245), "logo_dark.png")   # dark app-icon, mark pops
+print("wrote logo_white.png + logo_dark.png (512x512) from official yt-dlp mark")
