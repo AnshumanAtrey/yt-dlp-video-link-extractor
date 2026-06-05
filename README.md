@@ -97,6 +97,8 @@ yt-dlp is the most actively maintained extractor project in the world, and this 
 
 **Q: A TikTok / Instagram / X link failed. Why?** Those platforms aggressively block datacenter IPs. Supply a residential proxy in `proxyConfiguration` and/or `cookies` and retry. Most other sites work with no proxy.
 
+**Q: Does YouTube work?** Yes for a single or a few URLs per run. YouTube rate-limits rapid repeated requests from cloud (datacenter) IPs, so resolving many YouTube URLs in one run can trip a "confirm you're not a bot" challenge after the first few. For heavy YouTube bulk, pass `cookies` or a residential proxy, or split the work across runs.
+
 **Q: Can I pass a whole playlist or channel?** Yes. It expands to the videos inside, capped by `playlistLimit`.
 
 **Q: Can I get just the audio?** Yes - `best_audio_url` is the best audio-only stream. For music sites it is also the `best_url`.
