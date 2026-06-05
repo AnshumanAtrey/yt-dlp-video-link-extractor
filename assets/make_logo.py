@@ -41,25 +41,20 @@ def font(size):
     return ImageFont.load_default()
 
 
-def build(tile_rgb, word_rgb, name):
+def build(tile_rgb, name):
     img = Image.new("RGBA", (SS, SS), (0, 0, 0, 0))
     mask = Image.new("L", (SS, SS), 0)
     ImageDraw.Draw(mask).rounded_rectangle([0, 0, SS - 1, SS - 1], radius=int(SS * 0.205), fill=255)
     img.paste(Image.new("RGBA", (SS, SS), tile_rgb + (255,)), (0, 0), mask)
-    # place mark upper-center
-    scale = min(SS * 0.74 / mw, SS * 0.42 / mh)
+    # big mark, centered both axes
+    scale = min(SS * 0.86 / mw, SS * 0.66 / mh)
     nm = mark.resize((int(mw * scale), int(mh * scale)), Image.LANCZOS)
-    img.alpha_composite(nm, ((SS - nm.width) // 2, int(SS * 0.235)))
-    # wordmark
-    d = ImageDraw.Draw(img)
-    f = font(int(SS * 0.10))
-    tb = d.textbbox((0, 0), "yt-dlp", font=f)
-    d.text(((SS - (tb[2] - tb[0])) / 2 - tb[0], SS * 0.70 - tb[1]), "yt-dlp", font=f, fill=word_rgb)
+    img.alpha_composite(nm, ((SS - nm.width) // 2, (SS - nm.height) // 2))
     out = img.resize((S, S), Image.LANCZOS)
     out.save(f"{OUT}/{name}")
     return name
 
 
-build((255, 255, 255), RED, "logo_white.png")          # faithful, matches original bg
-build((13, 17, 23), (236, 240, 245), "logo_dark.png")   # dark app-icon, mark pops
+build((255, 255, 255), "logo_white.png")   # faithful, matches original bg
+build((13, 17, 23), "logo_dark.png")        # dark app-icon, mark pops
 print("wrote logo_white.png + logo_dark.png (512x512) from official yt-dlp mark")
