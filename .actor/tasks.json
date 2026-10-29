@@ -1,0 +1,46 @@
+{
+  "$comment": "Example tasks published on the Store by scripts/publish-tasks.mjs after every deploy (CI only). Each one is a search people type, with its own Google-indexed landing page and .md (manager/rules/SEO.md). URLs are the daily updater's smoke-test videos (scripts/smoke-test.sh), which resolve from Apify.",
+  "options": {
+    "build": "latest",
+    "memoryMbytes": 1024,
+    "timeoutSecs": 1200
+  },
+  "tasks": [
+    {
+      "name": "youtube-video-download-link",
+      "title": "YouTube video download link: direct MP4 and audio URLs",
+      "description": "Paste a YouTube video, Short or playlist link and get its direct media URLs: the best combined MP4, every format with resolution, codec and size, the audio-only stream, thumbnails and the title, length and channel. Links are YouTube's own and expire after a few hours, so download soon after the run.",
+      "input": {
+        "urls": ["https://www.youtube.com/watch?v=dQw4w9WgXcQ"]
+      },
+      "seoTitle": "YouTube Video Download Link - Direct MP4 and Audio",
+      "seoDescription": "Get a YouTube video's direct MP4 and audio URLs with every format, resolution and size, plus title, length and thumbnails. Videos, Shorts, playlists.",
+      "inputSchemaFields": ["urls", "includeFormats", "playlistLimit"],
+      "datasetView": "overview"
+    },
+    {
+      "name": "vimeo-video-download-link",
+      "title": "Vimeo video download link: direct MP4 URLs, no login",
+      "description": "Get the direct MP4 URLs of a public Vimeo video in every resolution, with title, length and thumbnail, without a Vimeo account. vimeo.com and player.vimeo.com links both work, unlisted ones too when the link carries their hash.",
+      "input": {
+        "urls": ["https://player.vimeo.com/video/76979871"]
+      },
+      "seoTitle": "Vimeo Video Download Link - Direct MP4, No Login",
+      "seoDescription": "Direct MP4 URLs of a public Vimeo video in every resolution, with title, length and thumbnail. No Vimeo account needed; unlisted links work too.",
+      "inputSchemaFields": ["urls", "includeFormats"],
+      "datasetView": "overview"
+    },
+    {
+      "name": "soundcloud-to-mp3-link",
+      "title": "SoundCloud track link: direct audio URL and metadata",
+      "description": "Paste SoundCloud track links and get each track's direct audio stream URL with format and bitrate, plus title, artist, length and artwork. Works for any of 1,000+ sites yt-dlp supports, Dailymotion, Twitch clips and Bandcamp among them.",
+      "input": {
+        "urls": ["https://soundcloud.com/ethmusic/lostin-powers-she-so-heavy", "https://www.dailymotion.com/video/x5kesuj"]
+      },
+      "seoTitle": "SoundCloud Track Link - Direct Audio URL and Info",
+      "seoDescription": "Direct audio URLs of SoundCloud tracks with format, bitrate, title, artist and artwork, and media links from 1,000+ other sites yt-dlp supports.",
+      "inputSchemaFields": ["urls", "includeFormats"],
+      "datasetView": "overview"
+    }
+  ]
+}

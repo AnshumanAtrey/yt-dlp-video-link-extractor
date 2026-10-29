@@ -16,5 +16,74 @@
     "build": "latest",
     "memoryMbytes": 1024,
     "timeoutSecs": 1200
+  },
+  "pricing": {
+    "apply": true,
+    "$comment": "Store discounts (owner's Gentle ladder, rolled out 2026-10-29 after holehe and social-analyzer): Free and Starter keep the flat price, Scale pays 10% less, Business and above 20% less; apify-actor-start stays flat. Aug-Oct paid revenue of this actor came almost all from Starter, and Apify bills our platform cost of Scale and Business runs lower only when discounts are on (compute $0.16 and $0.13 per CU instead of $0.20, https://docs.apify.com/actors/monetize/pricing-and-costs.md). The CI script applies first-time pricing and decreases; increases go through Console with 14 days' notice.",
+    "pricingInfos": [
+      {
+        "pricingModel": "PAY_PER_EVENT",
+        "apifyMarginPercentage": 0.2,
+        "pricingPerEvent": {
+          "actorChargeEvents": {
+            "apify-actor-start": {
+              "eventTitle": "Actor Start",
+              "eventDescription": "Charged when the Actor starts running. Number of events charged depends on Actor memory (one event per GB, minimum one event).",
+              "eventPriceUsd": 0.002
+            },
+            "url-processed": {
+              "eventTitle": "URL processed",
+              "eventDescription": "Charged once per input URL the actor attempts to resolve, whether or not a video is found. Covers the resolve attempt.",
+              "eventTieredPricingUsd": {
+                "FREE": {
+                  "tieredEventPriceUsd": 0.003
+                },
+                "BRONZE": {
+                  "tieredEventPriceUsd": 0.003
+                },
+                "SILVER": {
+                  "tieredEventPriceUsd": 0.0027
+                },
+                "GOLD": {
+                  "tieredEventPriceUsd": 0.0024
+                },
+                "PLATINUM": {
+                  "tieredEventPriceUsd": 0.0024
+                },
+                "DIAMOND": {
+                  "tieredEventPriceUsd": 0.0024
+                }
+              }
+            },
+            "video-resolved": {
+              "eventTitle": "Video resolved",
+              "eventDescription": "Charged per video successfully resolved to its direct links and metadata.",
+              "isPrimaryEvent": true,
+              "eventTieredPricingUsd": {
+                "FREE": {
+                  "tieredEventPriceUsd": 0.04
+                },
+                "BRONZE": {
+                  "tieredEventPriceUsd": 0.04
+                },
+                "SILVER": {
+                  "tieredEventPriceUsd": 0.036
+                },
+                "GOLD": {
+                  "tieredEventPriceUsd": 0.032
+                },
+                "PLATINUM": {
+                  "tieredEventPriceUsd": 0.032
+                },
+                "DIAMOND": {
+                  "tieredEventPriceUsd": 0.032
+                }
+              }
+            }
+          }
+        },
+        "reasonForChange": "Store discounts: Scale plans pay 10% less and Business and enterprise plans 20% less. Free and Starter prices are unchanged."
+      }
+    ]
   }
 }

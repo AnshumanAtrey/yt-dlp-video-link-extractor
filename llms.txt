@@ -23,7 +23,7 @@ yt-dlp Video Link Extractor is an Apify Actor that takes any video URL and retur
 - $0.003 per URL processed
 - $0.04 per video successfully resolved
 
-Single video: ~$0.045. Failed URL: ~$0.005 (no resolution fee). 50-video playlist: ~$2.00.
+Single video: ~$0.045. Failed URL: ~$0.005 (no resolution fee). 50-video playlist: ~$2.00. On Apify's Scale plan the URL and video fees are 10% less, on Business and above 20% less.
 
 ## When to use
 

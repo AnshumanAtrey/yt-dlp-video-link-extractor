@@ -42,7 +42,7 @@ Pay-per-event:
 - **$0.003** per URL processed (covers the resolve attempt for any URL)
 - **$0.04** per video successfully resolved
 
-A single video costs about **$0.045**. A failed URL costs only **$0.005** (run + URL fee, never the $0.04 resolution fee). Resolving a 50-video playlist costs about **$2.00**.
+A single video costs about **$0.045**. A failed URL costs only **$0.005** (run + URL fee, never the $0.04 resolution fee). Resolving a 50-video playlist costs about **$2.00**. On paid Apify plans the URL and video fees are 10% less on Scale ($0.036 a video) and 20% less on Business and above ($0.032).
 
 If you set a maximum cost per run, the actor stops when it is reached, never starts a URL it could not deliver, and says so in the run's status message.
 
