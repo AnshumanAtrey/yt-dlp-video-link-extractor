@@ -11,9 +11,13 @@
   "readme": "../README.md",
   "minMemoryMbytes": 256,
   "maxMemoryMbytes": 1024,
-  "categories": ["VIDEOS", "DEVELOPER_TOOLS", "OTHER"],
+  "categories": [
+    "VIDEOS",
+    "DEVELOPER_TOOLS",
+    "OTHER"
+  ],
   "seoTitle": "yt-dlp Link Extractor - Any Video URL to Direct Links",
-  "seoDescription": "Paste any video URL, get direct stream + download links plus metadata. yt-dlp across 1000+ sites: YouTube, TikTok, Vimeo, Twitch, SoundCloud. Just the links. Bulk.",
+  "seoDescription": "Paste any video URL and get direct stream and download links plus metadata. yt-dlp on 1000+ sites: YouTube, TikTok, Vimeo, Twitch, SoundCloud. Bulk lists.",
   "storages": {
     "dataset": {
       "actorSpecification": 1,
@@ -37,14 +41,426 @@
           "display": {
             "component": "table",
             "properties": {
-              "title": { "label": "Title" },
-              "extractor": { "label": "Site" },
-              "duration": { "label": "Length" },
-              "view_count": { "label": "Views" },
-              "best_resolution": { "label": "Quality" },
-              "best_url_kind": { "label": "Type" },
-              "best_url": { "label": "Direct link" },
-              "webpage_url": { "label": "Source" }
+              "title": {
+                "label": "Video title (title)"
+              },
+              "extractor": {
+                "label": "Site (extractor)"
+              },
+              "duration": {
+                "label": "Length (duration)"
+              },
+              "view_count": {
+                "label": "Views (view_count)"
+              },
+              "best_resolution": {
+                "label": "Quality (best_resolution)"
+              },
+              "best_url_kind": {
+                "label": "Link type (best_url_kind)"
+              },
+              "best_url": {
+                "label": "Direct link (best_url)"
+              },
+              "webpage_url": {
+                "label": "Source page (webpage_url)"
+              }
+            }
+          }
+        }
+      },
+      "fields": {
+        "type": "object",
+        "properties": {
+          "input_url": {
+            "type": "string",
+            "title": "Input URL (input_url)",
+            "description": "The URL you gave, as you entered it. A playlist gives one row per video, each with the playlist URL here.",
+            "example": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+          },
+          "ok": {
+            "type": "boolean",
+            "title": "Resolved? (ok)",
+            "description": "True when the video resolved to its links; false when the URL failed, with the reason in error.",
+            "example": true
+          },
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "Why it failed (error)",
+            "description": "The reason a URL could not be resolved, from yt-dlp or the site. Only on rows where ok is false.",
+            "example": null
+          },
+          "extractor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "Site (extractor)",
+            "description": "The yt-dlp extractor that handled the URL, which names the site.",
+            "example": "youtube"
+          },
+          "id": {
+            "type": [
+              "string",
+              "number",
+              "null"
+            ],
+            "title": "Video ID (id)",
+            "description": "The video's ID on its site.",
+            "example": "dQw4w9WgXcQ"
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "Video title (title)",
+            "description": "The video's title.",
+            "example": "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)"
+          },
+          "uploader": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "Channel name (uploader)",
+            "description": "The channel or account that published the video.",
+            "example": "Rick Astley"
+          },
+          "channel_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "Channel link (channel_url)",
+            "description": "Link to the uploader's channel or profile page.",
+            "example": "https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw"
+          },
+          "webpage_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "Source page (webpage_url)",
+            "description": "The video's own page. For vimeo.com links it is the public player page the actor resolved.",
+            "example": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+          },
+          "duration_seconds": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "title": "Length in seconds (duration_seconds)",
+            "description": "The video's length in seconds.",
+            "example": 213
+          },
+          "duration": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "Length (duration)",
+            "description": "The video's length as H:MM:SS or M:SS.",
+            "example": "3:33"
+          },
+          "view_count": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "title": "Views (view_count)",
+            "description": "How many times the video was viewed, when the site shows it.",
+            "example": 1700000000
+          },
+          "like_count": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "title": "Likes (like_count)",
+            "description": "How many likes the video has, when the site shows it.",
+            "example": 18000000
+          },
+          "upload_date": {
+            "type": [
+              "string",
+              "number",
+              "null"
+            ],
+            "title": "Upload date (upload_date)",
+            "description": "The day the video was published, as YYYY-MM-DD.",
+            "example": "2009-10-25"
+          },
+          "is_live": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "title": "Live stream? (is_live)",
+            "description": "True for a live stream, which resolves to a stream manifest instead of a finished file.",
+            "example": false
+          },
+          "thumbnail": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "Cover image (thumbnail)",
+            "description": "Link to the video's main thumbnail image.",
+            "example": "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg"
+          },
+          "best_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "Direct link (best_url)",
+            "description": "The best single link: a combined audio and video file when the site has one, otherwise the best video or audio stream.",
+            "example": "https://rr1---sn-example.googlevideo.com/videoplayback?..."
+          },
+          "best_url_kind": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "Link type (best_url_kind)",
+            "description": "What best_url holds: combined, video, audio or other.",
+            "example": "combined"
+          },
+          "best_url_protocol": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "Stream type (best_url_protocol)",
+            "description": "How best_url streams: https for a plain file, m3u8 or dash for a stream manifest.",
+            "example": "https"
+          },
+          "best_ext": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "File type (best_ext)",
+            "description": "The file extension of best_url.",
+            "example": "mp4"
+          },
+          "best_resolution": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "Quality (best_resolution)",
+            "description": "The resolution of best_url, or audio only.",
+            "example": "640x360"
+          },
+          "best_video_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "Best video link (best_video_url)",
+            "description": "The highest-resolution video stream, often without audio on YouTube and Vimeo.",
+            "example": "https://rr1---sn-example.googlevideo.com/videoplayback?..."
+          },
+          "best_video_resolution": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "Video quality (best_video_resolution)",
+            "description": "The resolution of best_video_url.",
+            "example": "3840x2160"
+          },
+          "best_audio_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "Best audio link (best_audio_url)",
+            "description": "The best audio-only stream.",
+            "example": "https://rr1---sn-example.googlevideo.com/videoplayback?..."
+          },
+          "best_audio_ext": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "Audio file type (best_audio_ext)",
+            "description": "The file extension of best_audio_url.",
+            "example": "m4a"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "Video description (description)",
+            "description": "The video's description, first 500 characters.",
+            "example": "The official video for Never Gonna Give You Up by Rick Astley."
+          },
+          "formats": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "title": "All formats (formats)",
+            "description": "Every format the site offers, each with its own direct link. Only when All formats is on.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "format_id": {
+                  "type": [
+                    "string",
+                    "number",
+                    "null"
+                  ],
+                  "title": "Format ID (format_id)",
+                  "description": "The site's ID for this format.",
+                  "example": "18"
+                },
+                "ext": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "title": "File type (ext)",
+                  "description": "The file extension of this format.",
+                  "example": "mp4"
+                },
+                "resolution": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "title": "Quality (resolution)",
+                  "description": "The resolution, or audio only.",
+                  "example": "640x360"
+                },
+                "fps": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "title": "Frames per second (fps)",
+                  "description": "The frame rate.",
+                  "example": 25
+                },
+                "vcodec": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "title": "Video codec (vcodec)",
+                  "description": "The video codec, or none for audio only.",
+                  "example": "avc1.42001E"
+                },
+                "acodec": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "title": "Audio codec (acodec)",
+                  "description": "The audio codec, or none for video only.",
+                  "example": "mp4a.40.2"
+                },
+                "filesize": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "title": "File size in bytes (filesize)",
+                  "description": "The size in bytes, exact or estimated, when known.",
+                  "example": 5900000
+                },
+                "tbr": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "title": "Bitrate in kbps (tbr)",
+                  "description": "The total bitrate in kilobits per second.",
+                  "example": 220.5
+                },
+                "note": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "title": "Format note (note)",
+                  "description": "The site's label for the format, such as 360p or medium.",
+                  "example": "360p"
+                },
+                "url": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "title": "Direct link (url)",
+                  "description": "The direct link to this format.",
+                  "example": "https://rr1---sn-example.googlevideo.com/videoplayback?..."
+                }
+              }
+            },
+            "example": [
+              {
+                "format_id": "18",
+                "ext": "mp4",
+                "resolution": "640x360",
+                "url": "https://rr1---sn-example.googlevideo.com/videoplayback?..."
+              }
+            ]
+          },
+          "thumbnails": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "title": "All thumbnails (thumbnails)",
+            "description": "Links to every thumbnail size. Only when All formats is on.",
+            "items": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "example": [
+              "https://i.ytimg.com/vi/dQw4w9WgXcQ/default.jpg"
+            ]
+          },
+          "subtitles": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "title": "Caption tracks (subtitles)",
+            "description": "Subtitle tracks by language, each with a file type and link. Only when Subtitles is on.",
+            "example": {
+              "en": [
+                {
+                  "ext": "vtt",
+                  "url": "https://www.youtube.com/api/timedtext?..."
+                }
+              ]
+            }
+          },
+          "auto_captions": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "title": "Auto captions (auto_captions)",
+            "description": "Automatic caption tracks by language, same shape as subtitles. Only when Subtitles is on.",
+            "example": {
+              "en": [
+                {
+                  "ext": "vtt",
+                  "url": "https://www.youtube.com/api/timedtext?..."
+                }
+              ]
             }
           }
         }

@@ -8,6 +8,8 @@ apify>=4.1,<5
 # to each new release after it resolves the smoke-test videos at least as well as the current one.
 # [default] brings yt-dlp-ejs, which solves YouTube's JavaScript challenges with the Deno runtime
 # below. Without both, YouTube returns no combined audio+video format and best_url is audio only
-# (verified 2026-10-29 on 2026.08.19 and 2026.10.26).
-yt-dlp[default]==2026.10.26
+# (verified 2026-10-29 on 2026.08.19 and 2026.10.26). [curl-cffi] gives yt-dlp the browser
+# impersonation that 25 extractors fall back to when a site blocks the request: without it,
+# Dailymotion failed from Apify's IPs ("none of these impersonate targets are available").
+yt-dlp[default,curl-cffi]==2026.10.26
 deno>=2.3,<3

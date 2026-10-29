@@ -11,7 +11,15 @@ from __future__ import annotations
 
 from apify import Actor
 
-from .resolve import iter_records
+from .resolve import Resolver, is_bot_check
+
+URL_EVENT = "url-processed"
+VIDEO_EVENT = "video-resolved"
+
+
+def usd(amount):
+    """A limit or a price as people read it: $0.043, $0.5, $5."""
+    return "$" + (f"{float(amount):.4f}".rstrip("0").rstrip(".") or "0")
 
 
 async def charge(event):
@@ -20,6 +28,40 @@ async def charge(event):
         await Actor.charge(event)
     except Exception as exc:  # noqa: BLE001
         Actor.log.debug(f"charge({event}) skipped: {exc}")
+
+
+class Budget:
+    """The run's spending limit, which Apify says a run must stop at.
+
+    A URL is started only while the limit can still pay its URL fee and one
+    video, so the actor never resolves what it could not deliver. Before this,
+    rows past the limit were pushed for free (2026-10-29: limit $0.05, 2 videos
+    delivered, 1 charged).
+    """
+
+    def __init__(self):
+        self.cm = Actor.get_charging_manager()
+        info = self.cm.get_pricing_info()
+        self.ppe = info.is_pay_per_event
+        self.limit = info.max_total_charge_usd
+        self.next_cost = sum(info.per_event_prices.get(event, 0) for event in (URL_EVENT, VIDEO_EVENT))
+
+    def can_pay_next(self):
+        return not self.ppe or self.limit - self.cm.calculate_total_charged_amount() >= self.next_cost
+
+
+async def residential_proxy_url():
+    """An Apify residential proxy URL, for the videos a site refused to the run's own IP.
+
+    Only those go through it: residential traffic is billed to us per GB, about
+    $0.007 per YouTube video (run LXk55Qbupcw9GQqxh, 2026-10-29).
+    """
+    try:
+        proxy_cfg = await Actor.create_proxy_configuration(groups=["RESIDENTIAL"])
+        return await proxy_cfg.new_url() if proxy_cfg else None
+    except Exception as exc:  # noqa: BLE001
+        Actor.log.warning(f"Residential proxy unavailable, bot-checked URLs stay failed: {exc}")
+        return None
 
 
 async def main() -> None:
@@ -39,6 +81,15 @@ async def main() -> None:
             Actor.log.warning('No URLs given. Add at least one video URL to "urls".')
             return
 
+        budget = Budget()
+        if not budget.can_pay_next():
+            msg = (f"Nothing was resolved and no URL or video was charged: this run's spending limit of "
+                   f"{usd(budget.limit)} cannot pay for one video ({usd(budget.next_cost)} with its URL fee). "
+                   "Raise the run's maximum cost in the run options, or add credit, then run it again.")
+            Actor.log.warning(msg)
+            await Actor.set_status_message(msg)
+            return
+
         # Optional proxy - helps with sites that block datacenter IPs.
         proxy_url = None
         proxy_input = actor_input.get("proxyConfiguration")
@@ -55,31 +106,56 @@ async def main() -> None:
             with open(cookie_file, "w", encoding="utf-8") as handle:
                 handle.write(cookies)
 
-        resolved = 0
-        failed = 0
-        charged_urls = set()
-        for record in iter_records(
-            urls,
+        resolver = Resolver(
             playlist_limit=playlist_limit,
             include_formats=include_formats,
             include_subtitles=include_subtitles,
-            proxy_url=proxy_url,
             cookie_file=cookie_file,
             logger=Actor.log.info,
-        ):
-            # Charge once per input URL processed - covers the compute of every
-            # attempt, including failures, so a run of dead/blocked URLs still
-            # pays for its compute (no per-record bleed).
-            input_url = record.get("input_url")
-            if input_url and input_url not in charged_urls:
-                charged_urls.add(input_url)
-                await charge("url-processed")
+        )
+        residential = None  # created on the first bot check, then shared by the rest
+        resolved = failed = retried = 0
+        stopped = False
+        try:
+            for url in urls:
+                if not budget.can_pay_next():
+                    stopped = True
+                    break
+                records = resolver.records(url, proxy_url)
+                # The user chose no proxy, and the site refused the run's datacenter IP:
+                # retry this URL alone through a residential one.
+                if not proxy_url and len(records) == 1 and is_bot_check(records[0]):
+                    residential = residential or await residential_proxy_url()
+                    if residential:
+                        Actor.log.info(f"{url}: bot check on the run's IP, retrying through a residential proxy")
+                        records = resolver.records(url, residential)
+                        retried += 1
 
-            await Actor.push_data(record)
-            if record.get("ok"):
-                await charge("video-resolved")
-                resolved += 1
-            else:
-                failed += 1
+                # Charge once per input URL processed - covers the compute of every
+                # attempt, including failures, so a run of dead/blocked URLs still
+                # pays for its compute (no per-record bleed).
+                await charge(URL_EVENT)
+                for record in records:
+                    if not record.get("ok"):
+                        await Actor.push_data(record)
+                        failed += 1
+                        continue
+                    # The SDK pushes the record only if the limit can pay for it.
+                    result = await Actor.push_data(record, charged_event_name=VIDEO_EVENT)
+                    if budget.ppe and not result.charged_count:
+                        stopped = True
+                        break
+                    resolved += 1
+                if stopped:
+                    break
+        finally:
+            resolver.close()
 
-        Actor.log.info(f"Done. resolved={resolved}, failed={failed}, inputs={len(urls)}")
+        msg = f"Resolved {resolved} video(s) from {len(urls)} URL(s); {failed} URL(s) failed."
+        if retried:
+            msg += f" {retried} URL(s) went through a residential proxy after a bot check."
+        if stopped:
+            msg += (f" Stopped early: this run's spending limit of {usd(budget.limit)} was reached. "
+                    "Raise the run's maximum cost to resolve the rest.")
+        Actor.log.info(msg)
+        await Actor.set_status_message(msg)

@@ -1,6 +1,6 @@
 # yt-dlp Video Link Extractor - Any URL to Links, 1000+ Sites
 
-Paste any video URL and get back the direct stream and download links plus full metadata. No files are stored, no RAM is burned - it resolves the links, it does not host the bytes.
+Paste any video URL and get back the direct stream and download links plus full metadata, resolved by yt-dlp. No files are stored, no RAM is burned - it resolves the links, it does not host the bytes.
 
 Available as an [Apify Actor](https://apify.com/anshumanatrey/yt-dlp-video-link-extractor). $0.002 per run + $0.003 per URL processed + $0.04 per video resolved.
 
@@ -34,7 +34,7 @@ Most actors in this space stop at YouTube. This one hands you the raw links for 
 - Grab subtitle and caption track URLs across languages
 - Resolve every video in a playlist or channel to its links in one run
 
-## What does it cost?
+## How much does it cost to resolve a video?
 
 Pay-per-event:
 
@@ -43,6 +43,8 @@ Pay-per-event:
 - **$0.04** per video successfully resolved
 
 A single video costs about **$0.045**. A failed URL costs only **$0.005** (run + URL fee, never the $0.04 resolution fee). Resolving a 50-video playlist costs about **$2.00**.
+
+If you set a maximum cost per run, the actor stops when it is reached, never starts a URL it could not deliver, and says so in the run's status message.
 
 ## Which inputs does it take?
 
@@ -85,7 +87,7 @@ One record per resolved video. The link-first fields:
 
 ## How reliable is it?
 
-yt-dlp is the most actively maintained extractor project in the world, and this actor follows its releases. A daily job builds each new yt-dlp release, runs it next to the current build on the same test videos, and ships it only if it resolves them at least as well, so extractor fixes usually reach your runs within a day and a release that does worse is held back. YouTube results include the combined audio+video link, because the actor ships the Deno JavaScript runtime that yt-dlp needs to solve YouTube's player challenges.
+yt-dlp is the most actively maintained extractor project in the world, and this actor follows its releases. A daily job builds each new yt-dlp release, runs it next to the current build on the same test videos, and ships it only if it resolves them at least as well, so extractor fixes usually reach your runs within a day and a release that does worse is held back. YouTube results include the combined audio+video link, because the actor ships the Deno JavaScript runtime that yt-dlp needs to solve YouTube's player challenges. When YouTube refuses a video to the cloud IP with a bot check, the actor retries that video through a residential proxy on its own, and vimeo.com links go through Vimeo's public player page, so neither needs your account.
 
 ## Common questions
 
@@ -97,7 +99,9 @@ yt-dlp is the most actively maintained extractor project in the world, and this 
 
 **Q: A TikTok / Instagram / X link failed. Why?** Those platforms aggressively block datacenter IPs. Supply a residential proxy in `proxyConfiguration` and/or `cookies` and retry. Most other sites work with no proxy.
 
-**Q: Does YouTube work?** Yes for a single or a few URLs per run. YouTube rate-limits rapid repeated requests from cloud (datacenter) IPs, so resolving many YouTube URLs in one run can trip a "confirm you're not a bot" challenge after the first few. For heavy YouTube bulk, pass `cookies` or a residential proxy, or split the work across runs.
+**Q: Does YouTube work?** Yes: single videos, lists and playlists. YouTube answers some videos from cloud (datacenter) IPs with a "confirm you're not a bot" check. The actor then retries that video through a residential proxy automatically, at no extra charge, and the run's status message counts the retries. A retried video takes longer, about 20 to 40 seconds. Age-restricted and members-only videos still need `cookies`.
+
+**Q: Does Vimeo work?** Yes. vimeo.com links, unlisted ones included, are resolved through Vimeo's public player page, which needs no account. View counts and upload dates come only with a Vimeo login: pass `cookies` for those. A video whose owner blocks embedding cannot be resolved without an account.
 
 **Q: Can I pass a whole playlist or channel?** Yes. It expands to the videos inside, capped by `playlistLimit`.
 

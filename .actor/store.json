@@ -1,0 +1,20 @@
+{
+  "$comment": "Store listing fields that apify push never sends. Applied by scripts/store-metadata.mjs after every deploy. Title, description and categories live in actor.json.",
+  "actorId": "cK3FWRoOXpzpsUIuQ",
+  "seoTitle": "yt-dlp Link Extractor - Any Video URL to Direct Links",
+  "seoDescription": "Paste any video URL and get direct stream and download links plus metadata. yt-dlp on 1000+ sites: YouTube, TikTok, Vimeo, Twitch, SoundCloud. Bulk lists.",
+  "exampleRunInput$comment": "The prefill. Until 2026-10-29 the live example was the template's { \"helloWorld\": 123 }, which the API tab code samples and the .md page AI agents read showed to every buyer.",
+  "exampleRunInput": {
+    "urls": [
+      "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+    ]
+  },
+  "actorPermissionLevel": "LIMITED_PERMISSIONS",
+  "isPublic": true,
+  "defaultRunOptions$comment": "1 GB since 2026-10-29: the Deno runtime that solves YouTube's challenges peaks at about 280 MB, so a run peaked at 398-425 MB of the old 512 MB default (runs 8SK5ftTg94e6x8OOD, lBm5XZ8vWF2aNaBBZ). A heap cap broke the challenge solver, and JIT-less mode saved nothing. The start event stays one event at 1 GB, and Apify covers the first 5 s of compute.",
+  "defaultRunOptions": {
+    "build": "latest",
+    "memoryMbytes": 1024,
+    "timeoutSecs": 1200
+  }
+}

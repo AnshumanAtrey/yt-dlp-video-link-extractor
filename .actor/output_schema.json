@@ -6,13 +6,13 @@
   "properties": {
     "items": {
       "type": "string",
-      "title": "Resolved links",
+      "title": "Resolved links (items)",
       "description": "Direct stream/download links and metadata for each input URL.",
       "template": "{{links.apiDefaultDatasetUrl}}/items"
     },
     "log": {
       "type": "string",
-      "title": "Run log",
+      "title": "Run log (log)",
       "description": "Full execution log.",
       "template": "{{links.publicRunUrl}}/log"
     }
