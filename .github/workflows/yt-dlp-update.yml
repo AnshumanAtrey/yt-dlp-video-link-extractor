@@ -50,12 +50,12 @@ jobs:
         env:
           VERSION: ${{ inputs.version }}
         run: |
-          current=$(sed -n 's/^yt-dlp\[default\]==//p' requirements.txt)
+          current=$(sed -n 's/^yt-dlp\[[^]]*\]==//p' requirements.txt)
           target=${VERSION:-$(curl -sSf https://pypi.org/pypi/yt-dlp/json | jq -r .info.version)}
           # A PyPI release or nightly version, never anything sed or the shell could read as syntax.
           re='^[0-9][0-9.]*(\.dev[0-9]+)?$'
           [[ "$current" =~ $re && "$target" =~ $re ]] || { echo "unexpected version: current='$current' target='$target'"; exit 1; }
-          sed -i "s/^yt-dlp\[default\]==.*/yt-dlp[default]==$target/" requirements.txt
+          sed -i "s/^\(yt-dlp\[[^]]*\]\)==.*/\1==$target/" requirements.txt
           changed=false; [ "$current" != "$target" ] && changed=true
           echo "yt-dlp $current -> $target; changed=$changed"
           { echo "current=$current"; echo "target=$target"; echo "changed=$changed"; } >> "$GITHUB_OUTPUT"

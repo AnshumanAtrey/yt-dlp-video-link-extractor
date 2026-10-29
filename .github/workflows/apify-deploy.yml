@@ -21,6 +21,10 @@ on:
     paths-ignore:
       - '.github/**'
   workflow_dispatch:
+    inputs:
+      build_tag:
+        description: 'Build tag for a staging build, e.g. beta (default: latest from .actor/actor.json). Run it with build=beta; users keep running latest.'
+        required: false
 
 concurrency:
   group: apify-deploy-${{ github.ref }}
@@ -37,6 +41,7 @@ jobs:
         uses: apify/push-actor-action@v1
         with:
           token: ${{ secrets.APIFY_TOKEN }}
+          build-tag: ${{ inputs.build_tag }}
 
       - name: Report build
         run: |
@@ -50,6 +55,7 @@ jobs:
   # number is the workflow run number (see scripts/mcp-server-json.mjs).
   mcp-registry:
     needs: deploy
+    if: ${{ !inputs.build_tag }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write
