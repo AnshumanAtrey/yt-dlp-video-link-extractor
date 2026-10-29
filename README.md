@@ -85,7 +85,7 @@ One record per resolved video. The link-first fields:
 
 ## How reliable is it?
 
-yt-dlp is the most actively maintained extractor project in the world, and this actor pulls the latest release on every rebuild, so extractor fixes land automatically. Validated at build time across YouTube, YouTube Shorts, Vimeo (adaptive streams correctly resolved to a progressive file), and SoundCloud, plus playlist expansion and graceful handling of dead URLs.
+yt-dlp is the most actively maintained extractor project in the world, and this actor follows its releases. A daily job builds each new yt-dlp release, runs it next to the current build on the same test videos, and ships it only if it resolves them at least as well, so extractor fixes usually reach your runs within a day and a release that does worse is held back. YouTube results include the combined audio+video link, because the actor ships the Deno JavaScript runtime that yt-dlp needs to solve YouTube's player challenges.
 
 ## Common questions
 

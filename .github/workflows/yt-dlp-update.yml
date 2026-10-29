@@ -1,0 +1,109 @@
+# Keep yt-dlp current without ever shipping a broken build.
+#
+# Daily (and on demand): move the requirements.txt pin to the latest yt-dlp release on PyPI. When it
+# changed, the current and the candidate image are both built here on the runner and run on the
+# same videos (scripts/smoke-test.sh). The candidate ships only if it scored at least as well as
+# the current image did in the same minute (sites are flaky and YouTube may refuse runner IPs, so
+# the comparison is relative, never a fixed number). Shipping = commit to main + dispatch the
+# deploy workflow. Otherwise production stays on the old pin and an issue says why.
+#
+# The live build sat on yt-dlp 2026.08.19 for two months because nothing rebuilt it (2026-10-29).
+# Pushes made with GITHUB_TOKEN do not trigger other workflows, so the deploy is started explicitly
+# with `gh workflow run` (workflow_dispatch is exempt). Same design as theharvester-osint's
+# theharvester-update.yml.
+
+name: Track yt-dlp releases
+
+on:
+  schedule:
+    - cron: '43 5 * * *'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'yt-dlp version to try (default: latest release on PyPI; a nightly such as 2026.11.2.232934.dev0 works too)'
+        required: false
+      dry_run:
+        description: 'Build and smoke-test only; never commit, deploy or open an issue'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: write
+  issues: write
+
+concurrency:
+  group: yt-dlp-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pick target version
+        id: bump
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          current=$(sed -n 's/^yt-dlp\[default\]==//p' requirements.txt)
+          target=${VERSION:-$(curl -sSf https://pypi.org/pypi/yt-dlp/json | jq -r .info.version)}
+          # A PyPI release or nightly version, never anything sed or the shell could read as syntax.
+          re='^[0-9][0-9.]*(\.dev[0-9]+)?$'
+          [[ "$current" =~ $re && "$target" =~ $re ]] || { echo "unexpected version: current='$current' target='$target'"; exit 1; }
+          sed -i "s/^yt-dlp\[default\]==.*/yt-dlp[default]==$target/" requirements.txt
+          changed=false; [ "$current" != "$target" ] && changed=true
+          echo "yt-dlp $current -> $target; changed=$changed"
+          { echo "current=$current"; echo "target=$target"; echo "changed=$changed"; } >> "$GITHUB_OUTPUT"
+
+      - name: Build current and candidate images
+        if: steps.bump.outputs.changed == 'true'
+        run: |
+          cp requirements.txt "$RUNNER_TEMP/requirements.candidate"
+          git checkout -- requirements.txt
+          docker build -q -t ytdlp:current .
+          cp "$RUNNER_TEMP/requirements.candidate" requirements.txt
+          docker build -q -t ytdlp:candidate .
+
+      - name: Smoke-test both on the same videos
+        id: smoke
+        if: steps.bump.outputs.changed == 'true'
+        run: |
+          chmod +x scripts/smoke-test.sh
+          current=$(scripts/smoke-test.sh ytdlp:current || echo 0)
+          candidate=$(scripts/smoke-test.sh ytdlp:candidate || echo -1)
+          echo "current=$current candidate=$candidate"
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "candidate=$candidate" >> "$GITHUB_OUTPUT"
+          if [ "$candidate" -gt 0 ] && [ "$candidate" -ge "$current" ]; then
+            echo "pass=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "pass=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Ship
+        if: steps.smoke.outputs.pass == 'true' && !inputs.dry_run
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898299+github-actions[bot]@users.noreply.github.com'
+          git commit -am "chore: yt-dlp ${{ steps.bump.outputs.current }} -> ${{ steps.bump.outputs.target }}
+
+          Smoke test: score ${{ steps.smoke.outputs.candidate }} vs ${{ steps.smoke.outputs.current }} on the current image."
+          git push
+          gh workflow run apify-deploy.yml --ref main
+
+      - name: Report a failed update
+        if: failure() || (steps.smoke.outputs.pass == 'false' && !inputs.dry_run)
+        run: |
+          title="yt-dlp auto-update blocked"
+          body="Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          Target: yt-dlp ${{ steps.bump.outputs.target || 'unknown' }}
+          Smoke test score: candidate ${{ steps.smoke.outputs.candidate || 'n/a' }} vs current ${{ steps.smoke.outputs.current || 'n/a' }}.
+          Production is unchanged and still on yt-dlp ${{ steps.bump.outputs.current || 'the old pin' }}."
+          [ "${{ inputs.dry_run }}" = "true" ] && { echo "$body"; exit 0; }
+          n=$(gh issue list --state open --search "in:title \"$title\"" --json number --jq '.[0].number')
+          if [ -n "$n" ]; then gh issue comment "$n" --body "$body"; else gh issue create --title "$title" --body "$body"; fi
