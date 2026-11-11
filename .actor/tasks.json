@@ -1,5 +1,5 @@
 {
-  "$comment": "Example tasks published on the Store by scripts/publish-tasks.mjs after every deploy (CI only). Each one is a search people type, with its own Google-indexed landing page and .md (manager/rules/SEO.md). URLs are the daily updater's smoke-test videos (scripts/smoke-test.sh), which resolve from Apify.",
+  "$comment": "Example tasks published on the Store by scripts/publish-tasks.mjs after every deploy (CI only). Each one is a search people type, with its own Google-indexed landing page and .md (manager/rules/SEO.md). URLs are the daily updater's smoke-test videos (scripts/smoke-test.sh), which resolve from Apify, except the subtitles, channel and Twitch clip examples, which were run on the live build on 2026-11-11 (runs marqLqGdbC9lQdxbY, efob5d4RJl64Kg2sP, EafQwW7g4Q6GZJb89) and their links downloaded from outside Apify.",
   "options": {
     "build": "latest",
     "memoryMbytes": 1024,
@@ -39,6 +39,46 @@
       },
       "seoTitle": "SoundCloud Track Link - Direct Audio URL and Info",
       "seoDescription": "Direct audio URLs of SoundCloud tracks with format, bitrate, title, artist and artwork, and media links from 1,000+ other sites yt-dlp supports.",
+      "inputSchemaFields": ["urls", "includeFormats"],
+      "datasetView": "overview"
+    },
+    {
+      "name": "youtube-subtitles-download",
+      "title": "YouTube subtitles download: caption URLs in every language",
+      "description": "Paste a YouTube video link and get a direct URL for every subtitle track it has, in SRT, VTT, TTML and JSON, plus the auto-generated captions, with the title, channel and length. The example, a TED talk, has subtitles in 49 languages. Links are YouTube's own and expire after a few hours, so download soon after the run.",
+      "input": {
+        "urls": ["https://www.youtube.com/watch?v=arj7oStGLkU"],
+        "includeSubtitles": true,
+        "includeFormats": false
+      },
+      "seoTitle": "YouTube Subtitles Download - SRT and VTT in Every Language",
+      "seoDescription": "Get every subtitle track of a YouTube video as SRT, VTT, TTML or JSON URLs, auto captions included, with title and channel. No login, no API key.",
+      "inputSchemaFields": ["urls", "includeSubtitles", "includeFormats"],
+      "datasetView": "overview"
+    },
+    {
+      "name": "youtube-channel-video-links",
+      "title": "YouTube channel video links: the latest videos of any channel",
+      "description": "Paste a YouTube channel's videos page and get its newest uploads, each with the title, length, view count, upload date and a direct media URL. Set how many videos to take; the example takes NASA's 5 newest. Links are YouTube's own and expire after a few hours, so download soon after the run.",
+      "input": {
+        "urls": ["https://www.youtube.com/@NASA/videos"],
+        "playlistLimit": 5,
+        "includeFormats": false
+      },
+      "seoTitle": "YouTube Channel Video Links - Latest Uploads of Any Channel",
+      "seoDescription": "List a YouTube channel's newest videos with title, length, views and a direct media URL for each. Set how many to take. No login, no API key.",
+      "inputSchemaFields": ["urls", "playlistLimit", "includeFormats"],
+      "datasetView": "overview"
+    },
+    {
+      "name": "twitch-clip-download-link",
+      "title": "Twitch clip download link: direct MP4 in every quality",
+      "description": "Paste a Twitch clip link and get its direct MP4 URL in every quality Twitch serves, up to 1080p, with the title, uploader, length and thumbnail. No Twitch login needed. The example is a clip from EA Play 2016. Links are Twitch's own, so download soon after the run.",
+      "input": {
+        "urls": ["https://clips.twitch.tv/FaintLightGullWholeWheat"]
+      },
+      "seoTitle": "Twitch Clip Download Link - Direct MP4 up to 1080p",
+      "seoDescription": "Get a Twitch clip's direct MP4 URL in every quality up to 1080p, with title, uploader, length and thumbnail. No Twitch login, no API key.",
       "inputSchemaFields": ["urls", "includeFormats"],
       "datasetView": "overview"
     }
