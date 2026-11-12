@@ -6,6 +6,13 @@ Available as an [Apify Actor](https://apify.com/anshumanatrey/yt-dlp-video-link-
 
 ---
 
+**Use it from an AI assistant:**
+
+- **Claude** (claude.ai and the desktop app): [Add yt-dlp Video Link Extractor to Claude](https://claude.ai/customize/connectors?modal=add-custom-connector&connectorName=yt-dlp%20Video%20Link%20Extractor&connectorUrl=https%3A%2F%2Fmcp.apify.com%3Ftools%3Danshumanatrey%2Fyt-dlp-video-link-extractor), click Continue, sign in to Apify, Allow, and ask in plain words.
+- **Claude Code:** `claude mcp add --transport http yt-dlp-video-link-extractor "https://mcp.apify.com?tools=anshumanatrey/yt-dlp-video-link-extractor"`, then run `/mcp` to sign in to Apify.
+- **Codex:** `codex mcp add yt-dlp-video-link-extractor --url "https://mcp.apify.com?tools=anshumanatrey/yt-dlp-video-link-extractor"`, then `codex mcp login yt-dlp-video-link-extractor`.
+- **Any other MCP client:** `https://mcp.apify.com?tools=anshumanatrey/yt-dlp-video-link-extractor`, signed in with Apify or an `Authorization: Bearer <APIFY_TOKEN>` header.
+
 ## What does it do?
 
 Give it one or more video URLs. For each one it returns the direct media links (a single combined audio+video file when one exists, plus the best video-only and audio-only streams), every available format with its own URL, thumbnails, subtitles, and the metadata: title, uploader, duration, view count, upload date.
