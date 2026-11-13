@@ -57,7 +57,7 @@ If you set a maximum cost per run, the actor stops when it is reached, never sta
 
 | Field | Required | What it does |
 |---|---|---|
-| `urls` | yes | One or more video URLs. Any yt-dlp site works. A playlist/channel URL expands to its videos. |
+| `urls` | yes | One or more video URLs. Any yt-dlp site works. A playlist/channel URL expands to its videos. Left blank, the run resolves the example video, free. |
 | `includeFormats` | optional | Include the full format list (every resolution + codec with its URL) and all thumbnails. Default on. |
 | `includeSubtitles` | optional | Include subtitle and auto-caption URLs by language. Default off. |
 | `playlistLimit` | optional | Max videos to resolve from a playlist/channel. Default 50. |

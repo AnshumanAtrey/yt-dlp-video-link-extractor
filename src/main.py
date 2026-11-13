@@ -15,6 +15,7 @@ from .resolve import Resolver, is_bot_check
 
 URL_EVENT = "url-processed"
 VIDEO_EVENT = "video-resolved"
+EXAMPLE_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"  # the form's prefill: resolved free when no URL is given
 
 
 def usd(amount):
@@ -77,12 +78,15 @@ async def main() -> None:
         include_formats = bool(actor_input.get("includeFormats", True))
         include_subtitles = bool(actor_input.get("includeSubtitles", False))
 
-        if not urls:
-            Actor.log.warning('No URLs given. Add at least one video URL to "urls".')
-            return
+        # No URL (a blank row passes Apify's input check, and the run used to end with nothing): resolve the example
+        # instead, free, so the run shows what it returns (owner, 2026-11-14).
+        example = not urls
+        if example:
+            urls = [EXAMPLE_URL]
+            Actor.log.warning(f'No URL given, so this run resolves the example {EXAMPLE_URL}, free.')
 
         budget = Budget()
-        if not budget.can_pay_next():
+        if not example and not budget.can_pay_next():
             msg = (f"Nothing was resolved and no URL or video was charged: this run's spending limit of "
                    f"{usd(budget.limit)} cannot pay for one video ({usd(budget.next_cost)} with its URL fee). "
                    "Raise the run's maximum cost in the run options, or add credit, then run it again.")
@@ -118,7 +122,7 @@ async def main() -> None:
         stopped = False
         try:
             for url in urls:
-                if not budget.can_pay_next():
+                if not example and not budget.can_pay_next():
                     stopped = True
                     break
                 records = resolver.records(url, proxy_url)
@@ -134,15 +138,16 @@ async def main() -> None:
                 # Charge once per input URL processed - covers the compute of every
                 # attempt, including failures, so a run of dead/blocked URLs still
                 # pays for its compute (no per-record bleed).
-                await charge(URL_EVENT)
+                if not example:
+                    await charge(URL_EVENT)
                 for record in records:
                     if not record.get("ok"):
                         await Actor.push_data(record)
                         failed += 1
                         continue
                     # The SDK pushes the record only if the limit can pay for it.
-                    result = await Actor.push_data(record, charged_event_name=VIDEO_EVENT)
-                    if budget.ppe and not result.charged_count:
+                    result = await Actor.push_data(record, charged_event_name=None if example else VIDEO_EVENT)
+                    if budget.ppe and not example and not result.charged_count:
                         stopped = True
                         break
                     resolved += 1
@@ -152,6 +157,9 @@ async def main() -> None:
             resolver.close()
 
         msg = f"Resolved {resolved} video(s) from {len(urls)} URL(s); {failed} URL(s) failed."
+        if example:
+            msg = (f"No URL was given, so this run resolved the example {EXAMPLE_URL}, free of charge. {msg} "
+                   "Enter your own video or playlist links in urls.")
         if retried:
             msg += f" {retried} URL(s) went through a residential proxy after a bot check."
         if stopped:
